@@ -1,15 +1,15 @@
 services:
   traefik:
     image: traefik:v2.9  # Adjust to the latest stable version
-    command:
-      - "--api=${TRAEFIK_API_INSECURE}"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-    ports:
-      - "80:80"
+    environment:
+      - ACME_EMAIL=${ACME_EMAIL}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./dynamic_conf.yml:/etc/traefik/dynamic_conf.yml:ro
+      - ./letsencrypt:/letsencrypt
+    ports:
+      - "80:80"
     networks:
       - web
 

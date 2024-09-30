@@ -1,0 +1,14 @@
+http:
+  middlewares:
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+  routers:
+    web-router:
+      entryPoints:
+        - web
+      middlewares:
+        - redirect-to-https
+      rule: "HostRegexp(`{any:.+}`)"
