@@ -4,7 +4,7 @@ tls:
   certificatesResolvers:
     myresolver:
       acme:
-        email: "${ACME_EMAIL}"
+        email: "steve@vandenbrinksoftware.com"
         storage: "/letsencrypt/acme.json"
         tlsChallenge: {}
 
