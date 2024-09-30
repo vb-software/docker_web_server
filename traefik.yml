@@ -1,0 +1,36 @@
+# traefik.yml
+
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: false
+
+# Entrypoints for HTTP and HTTPS
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+  websecure:
+    address: ":443"
+
+# Enable Traefik's dashboard and API
+api:
+  dashboard: true
+
+# Configure certificates resolver for Let's Encrypt
+certificatesResolvers:
+  myresolver:
+    acme:
+      email: "steve@vandenbrinksoftware.com"
+      storage: "/letsencrypt/acme.json"
+      tlsChallenge: {}
+
+# Docker provider configuration
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false

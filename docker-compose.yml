@@ -1,0 +1,90 @@
+services:
+  traefik:
+    image: traefik:v2.9  # Adjust to the latest stable version
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./dynamic_conf.yml:/etc/traefik/dynamic_conf.yml:ro
+      - ./letsencrypt:/letsencrypt
+    ports:
+      - "80:80"
+    networks:
+      - web
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`${PORTAINER_HOST}`)"
+      - "traefik.http.routers.portainer.entrypoints=${TRAEFIK_ENTRYPOINT}"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.docker.network=web"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - web
+
+  sonarqube:
+    build:
+      context: ./sonarqube
+    depends_on:
+      - db
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://db:5432/sonarqube
+      SONAR_JDBC_USERNAME: ${SONAR_JDBC_USERNAME}
+      SONAR_JDBC_PASSWORD: ${SONAR_JDBC_PASSWORD}
+      # Adjust Java options as needed
+      SONAR_SEARCH_JAVAOPTS: -Xms1g -Xmx1g
+      SONAR_CE_JAVAOPTS: -Xms512m -Xmx512m
+      SONAR_WEB_JAVAOPTS: -Xms512m -Xmx512m
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarqube.rule=Host(`${SONAR_HOST}`)"
+      - "traefik.http.routers.sonarqube.entrypoints=${TRAEFIK_ENTRYPOINT}"
+      - "traefik.http.services.sonarqube.loadbalancer.server.port=9000"
+      - "traefik.docker.network=web"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    networks:
+      - web
+      - sonarnet
+
+  db:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: ${SONAR_JDBC_USERNAME}
+      POSTGRES_PASSWORD: ${SONAR_JDBC_PASSWORD}
+      POSTGRES_DB: sonarqube
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+    networks:
+      - sonarnet
+
+  jenkins:
+    image: jenkins/jenkins:lts
+    user: ${JENKINS_USER}
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jenkins.rule=Host(`${JENKINS_HOST}`)"
+      - "traefik.http.routers.jenkins.entrypoints=${TRAEFIK_ENTRYPOINT}"
+      - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
+      - "traefik.docker.network=web"
+    networks:
+      - web
+
+volumes:
+  portainer_data:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+  postgresql_data:
+  jenkins_home:
+
+networks:
+  web:
+  sonarnet:

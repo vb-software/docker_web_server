@@ -1,0 +1,10 @@
+services:
+  traefik:
+    command:
+      - "--api.insecure=true"
+    ports:
+      - "8080:8080"
+
+  jenkins:
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

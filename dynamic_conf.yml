@@ -1,0 +1,24 @@
+# dynamic_conf.yml
+
+tls:
+  certificatesResolvers:
+    myresolver:
+      acme:
+        email: "steve@vandenbrinksoftware.com"
+        storage: "/letsencrypt/acme.json"
+        tlsChallenge: {}
+
+http:
+  middlewares:
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+  routers:
+    http-catchall:
+      entryPoints:
+        - web
+      middlewares:
+        - redirect-to-https
+      rule: "HostRegexp(`{any:.+}`)"
