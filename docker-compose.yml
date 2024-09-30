@@ -87,4 +87,5 @@ volumes:
 
 networks:
   web:
+    external: true
   sonarnet:
