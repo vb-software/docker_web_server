@@ -1,0 +1,40 @@
+services:
+  traefik:
+    command:
+      - "--api.dashboard=true"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - traefik_letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - web
+
+  portainer:
+    labels:
+      - "traefik.http.routers.portainer.tls.certresolver=myresolver"
+      - "traefik.docker.network=web"
+
+  sonarqube:
+    labels:
+      - "traefik.http.routers.sonarqube.tls.certresolver=myresolver"
+      - "traefik.docker.network=web"
+
+  jenkins:
+    labels:
+      - "traefik.http.routers.jenkins.tls.certresolver=myresolver"
+      - "traefik.docker.network=web"
+
+volumes:
+  traefik_letsencrypt:
+
+networks:
+  web:
