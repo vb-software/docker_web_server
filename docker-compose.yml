@@ -64,10 +64,16 @@ services:
       - sonarnet
 
   jenkins:
-    image: jenkins/jenkins:lts
-    user: ${JENKINS_USER}
+    build:
+      context: ./jenkins
+    container_name: jenkins
+    restart: unless-stopped
+    user: root  # Necessary for Docker access
     volumes:
       - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.jenkins.rule=Host(`${JENKINS_HOST}`)"
