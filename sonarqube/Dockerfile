@@ -10,4 +10,4 @@ RUN mkdir -p $SONARQUBE_HOME/extensions/plugins/ && \
     "https://github.com/mc1arke/sonarqube-community-branch-plugin/releases/download/${SONAR_BRANCH_PLUGIN_VERSION}/sonarqube-community-branch-plugin-${SONAR_BRANCH_PLUGIN_VERSION}.jar"
 
 # Expose the SonarQube port
-EXPOSE 9000
+# EXPOSE 9000
