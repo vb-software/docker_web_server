@@ -4,9 +4,6 @@ FROM jenkins/jenkins:lts
 # Switch to root to install additional packages
 USER root
 
-# Set Docker GID
-ARG DOCKER_GID=999
-
 # Install necessary tools and dependencies
 RUN apt-get update && apt-get install -y \
     apt-transport-https \
@@ -29,15 +26,8 @@ RUN apt-get update && apt-get install -y docker-ce-cli
 RUN curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose
 
-# Set up docker group
-RUN if getent group docker > /dev/null 2>&1; then \
-        groupmod -g ${DOCKER_GID} docker; \
-    else \
-        groupadd -g ${DOCKER_GID} docker; \
-    fi
-
-# Add jenkins user to docker group
-RUN usermod -aG docker jenkins
+# Add jenkins user to the group with GID 999 (likely to be the docker group on the host)
+RUN groupadd -g 999 docker_host || true && usermod -aG docker_host jenkins
 
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
