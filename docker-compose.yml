@@ -70,7 +70,6 @@ services:
     restart: unless-stopped
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
-      - JENKINS_OPTS="--prefix=/jenkins"
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
