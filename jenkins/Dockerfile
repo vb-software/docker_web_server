@@ -17,10 +17,14 @@ RUN curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-c
 # Install necessary tools
 RUN apt-get update && apt-get install -y gettext-base
 
-# Create docker group with same GID as host
+# Create docker group (it might already exist)
+RUN groupadd -f docker
+
+# Copy and set permissions for the setup script
 COPY docker-setup.sh /usr/local/bin/docker-setup.sh
 RUN chmod +x /usr/local/bin/docker-setup.sh
 
+# Switch back to jenkins user
 USER jenkins
 
 ENTRYPOINT ["/usr/local/bin/docker-setup.sh"]
