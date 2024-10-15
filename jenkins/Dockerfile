@@ -29,8 +29,12 @@ RUN apt-get update && apt-get install -y docker-ce-cli
 RUN curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose
 
-# Create or modify docker group
-RUN groupadd -g ${DOCKER_GID} docker || groupmod -g ${DOCKER_GID} docker
+# Set up docker group
+RUN if getent group docker > /dev/null 2>&1; then \
+        groupmod -g ${DOCKER_GID} docker; \
+    else \
+        groupadd -g ${DOCKER_GID} docker; \
+    fi
 
 # Add jenkins user to docker group
 RUN usermod -aG docker jenkins
