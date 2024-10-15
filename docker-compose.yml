@@ -68,6 +68,7 @@ services:
     container_name: jenkins
     user: root
     privileged: true # Required for Docker inside Jenkins
+    restart: unless-stopped
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock # This allows Jenkins to control Docker
