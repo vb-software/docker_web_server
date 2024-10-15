@@ -38,8 +38,18 @@ RUN GID_999_GROUP=$(getent group 999 | cut -d: -f1) && \
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Set up SSH configuration
+RUN mkdir -p /home/jenkins/.ssh && \
+    ssh-keyscan github.com > /home/jenkins/.ssh/known_hosts && \
+    chown -R jenkins:jenkins /home/jenkins/.ssh && \
+    chmod 700 /home/jenkins/.ssh && \
+    chmod 644 /home/jenkins/.ssh/known_hosts
+
+# Clean up
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Set up permissions for Jenkins home and switch back to jenkins user
-RUN mkdir -p /var/jenkins_home && chown -R jenkins:jenkins /var/jenkins_home
+RUN chown -R jenkins:jenkins /var/jenkins_home
 USER jenkins
 
 # Set the work directory
