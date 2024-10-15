@@ -23,6 +23,12 @@ RUN add-apt-repository \
 RUN apt-get update && \
     apt-get install -y docker-ce-cli
 
+# Create the docker group and add jenkins to it
+RUN groupadd docker && usermod -aG docker jenkins
+
+# Create directory for .NET Core and set permissions
+RUN mkdir -p /tmp/dotnet && chown jenkins:jenkins /tmp/dotnet
+
 # Switch back to jenkins user
 USER jenkins
 
