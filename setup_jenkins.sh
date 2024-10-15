@@ -8,7 +8,7 @@ export JENKINS_GID=$(id -g)
 docker run --rm -v jenkins_home:/var/jenkins_home alpine chown -R ${JENKINS_UID}:${JENKINS_GID} /var/jenkins_home
 
 # Start or restart your Docker Compose setup
-docker compose up -d
+docker compose up jenkins -d
 
 # Wait for Jenkins to start
 echo "Waiting for Jenkins to start..."
