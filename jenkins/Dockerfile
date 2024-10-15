@@ -1,45 +1,43 @@
+# Use the official Jenkins LTS image as the base
 FROM jenkins/jenkins:lts
 
+# Switch to root to install additional packages
 USER root
 
-# Install Docker dependencies
-RUN apt-get update && \
-    apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common && \
-    rm -rf /var/lib/apt/lists/*
+# Install necessary tools and dependencies
+RUN apt-get update && apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release \
+    software-properties-common
 
-# Add Docker's official GPG key
-RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+# Add Docker's official GPG key and repository
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+RUN echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
+  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-# Set up the Docker stable repository
-RUN add-apt-repository \
-   "deb [arch=amd64] https://download.docker.com/linux/debian \
-   $(lsb_release -cs) \
-   stable"
-
-# Install Docker Engine
-RUN apt-get update && \
-    apt-get install -y docker-ce docker-ce-cli containerd.io && \
-    rm -rf /var/lib/apt/lists/*
+# Install Docker CLI
+RUN apt-get update && apt-get install -y docker-ce-cli
 
 # Install Docker Compose
-RUN curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
+RUN curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose
 
-# Add Jenkins user to Docker group
+# Create jenkins user with specific UID/GID if not already created
+RUN groupadd -g 1000 jenkins || true && useradd -u 1000 -g jenkins -m jenkins || true
+
+# Add jenkins user to docker group
 RUN usermod -aG docker jenkins
 
-# Create a script to fix permissions at runtime
-RUN echo '#!/bin/bash\n\
-if [ "$JENKINS_UID" != "1000" ] || [ "$JENKINS_GID" != "1000" ]; then\n\
-  groupmod -g $JENKINS_GID jenkins\n\
-  usermod -u $JENKINS_UID -g $JENKINS_GID jenkins\n\
-  chown -R jenkins:jenkins /var/jenkins_home\n\
-fi\n\
-exec su-exec jenkins /sbin/tini -- /usr/local/bin/jenkins.sh "$@"' > /usr/local/bin/jenkins-entrypoint.sh && \
-    chmod +x /usr/local/bin/jenkins-entrypoint.sh
+# Clean up
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install su-exec
-RUN apt-get update && apt-get install -y su-exec && rm -rf /var/lib/apt/lists/*
+# Set up permissions for Jenkins home and switch back to jenkins user
+RUN mkdir -p /var/jenkins_home && chown -R jenkins:jenkins /var/jenkins_home
+USER jenkins
 
-# Set the entrypoint
-ENTRYPOINT ["/usr/local/bin/jenkins-entrypoint.sh"]
+# Set the work directory
+WORKDIR /var/jenkins_home

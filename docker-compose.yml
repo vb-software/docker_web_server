@@ -68,14 +68,16 @@ services:
       context: ./jenkins
     container_name: jenkins
     restart: unless-stopped
-    user: ${JENKINS_UID:-1000}:${JENKINS_GID:-1000}
-    volumes:
-      - $HOME/.ssh:/home/jenkins/.ssh:ro
-      - jenkins_home:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
       - JENKINS_OPTS="--prefix=/jenkins"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - $HOME/.ssh:/home/jenkins/.ssh:ro
+    ports:
+      - "8080:8080"
+      - "50000:50000"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.jenkins.rule=Host(`${JENKINS_HOST}`)"
