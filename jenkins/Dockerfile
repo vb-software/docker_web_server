@@ -26,8 +26,11 @@ RUN apt-get update && \
 # Create the docker group and add jenkins to it
 RUN groupadd docker && usermod -aG docker jenkins
 
-# Create directory for .NET Core and set permissions
-RUN mkdir -p /tmp/dotnet && chown jenkins:jenkins /tmp/dotnet
+# Create .dotnet directory and set permissions
+RUN mkdir -p /.dotnet && chown -R jenkins:jenkins /.dotnet
+
+# Give jenkins user permission to write to /usr/share/jenkins
+RUN chown -R jenkins:jenkins /usr/share/jenkins
 
 # Switch back to jenkins user
 USER jenkins
