@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Start Jenkins
-docker compose up -d
+docker compose up jenkins -d
 
 # Wait for Jenkins to start
 echo "Waiting for Jenkins to start..."
