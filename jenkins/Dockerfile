@@ -27,7 +27,13 @@ RUN curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-c
     chmod +x /usr/local/bin/docker-compose
 
 # Add jenkins user to the group with GID 999 (likely to be the docker group on the host)
-RUN groupadd -g 999 docker_host || true && usermod -aG docker_host jenkins
+RUN GID_999_GROUP=$(getent group 999 | cut -d: -f1) && \
+    if [ ! -z "$GID_999_GROUP" ]; then \
+        usermod -aG $GID_999_GROUP jenkins; \
+    else \
+        groupadd -g 999 docker_host && \
+        usermod -aG docker_host jenkins; \
+    fi
 
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
