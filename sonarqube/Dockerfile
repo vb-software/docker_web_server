@@ -9,9 +9,5 @@ RUN mkdir -p $SONARQUBE_HOME/extensions/plugins/ && \
     curl -fSL -o $SONARQUBE_HOME/extensions/plugins/sonar-community-branch-plugin.jar \
     "https://github.com/mc1arke/sonarqube-community-branch-plugin/releases/download/${SONAR_BRANCH_PLUGIN_VERSION}/sonarqube-community-branch-plugin-${SONAR_BRANCH_PLUGIN_VERSION}.jar"
 
-# Configure SonarQube to use the plugin
-RUN echo "sonar.web.javaAdditionalOpts=-javaagent:./extensions/plugins/sonarqube-community-branch-plugin-${SONAR_BRANCH_PLUGIN_VERSION}.jar=web" >> $SONARQUBE_HOME/conf/sonar.properties && \
-    echo "sonar.ce.javaAdditionalOpts=-javaagent:./extensions/plugins/sonarqube-community-branch-plugin-${SONAR_BRANCH_PLUGIN_VERSION}.jar=ce" >> $SONARQUBE_HOME/conf/sonar.properties
-
 # Expose the SonarQube port
 # EXPOSE 9000
