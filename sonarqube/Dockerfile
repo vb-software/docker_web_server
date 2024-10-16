@@ -1,13 +1,13 @@
-# Use the official SonarQube Community Edition image as the base
 FROM sonarqube:community
 
-# Set the plugin version (adjust to the latest version)
 ENV SONAR_BRANCH_PLUGIN_VERSION=1.22.0
 
-# Download and install the community branch plugin
-RUN mkdir -p $SONARQUBE_HOME/extensions/plugins/ && \
-    curl -fSL -o $SONARQUBE_HOME/extensions/plugins/sonar-community-branch-plugin.jar \
-    "https://github.com/mc1arke/sonarqube-community-branch-plugin/releases/download/${SONAR_BRANCH_PLUGIN_VERSION}/sonarqube-community-branch-plugin-${SONAR_BRANCH_PLUGIN_VERSION}.jar"
+USER root
 
-# Expose the SonarQube port
-# EXPOSE 9000
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /opt/sonarqube/extensions/plugins/ && \
+    curl -fSL -o /opt/sonarqube/extensions/plugins/sonarqube-community-branch-plugin-${SONAR_BRANCH_PLUGIN_VERSION}.jar \
+    https://github.com/mc1arke/sonarqube-community-branch-plugin/releases/download/${SONAR_BRANCH_PLUGIN_VERSION}/sonarqube-community-branch-plugin-${SONAR_BRANCH_PLUGIN_VERSION}.jar
+
+USER sonarqube
