@@ -36,7 +36,6 @@ services:
       - SONAR_JDBC_URL: jdbc:postgresql://db:5432/sonarqube
       - SONAR_JDBC_USERNAME: ${SONAR_JDBC_USERNAME}
       - SONAR_JDBC_PASSWORD: ${SONAR_JDBC_PASSWORD}
-      # Adjust Java options as needed
       - SONAR_SEARCH_JAVAOPTS: -Xms1g -Xmx1g
       - SONAR_CE_JAVAOPTS: -Xms512m -Xmx512m
       - SONAR_WEB_JAVAOPTS: -Xms512m -Xmx512m
