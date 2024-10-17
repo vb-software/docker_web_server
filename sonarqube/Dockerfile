@@ -1,4 +1,4 @@
-FROM sonarqube:community
+FROM sonarqube:10.6-community
 
 ENV SONAR_BRANCH_PLUGIN_VERSION=1.22.0
 
