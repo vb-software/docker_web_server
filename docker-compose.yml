@@ -28,6 +28,7 @@ services:
   sonarqube:
     build:
       context: ./sonarqube
+    container_name: sonarqube
     depends_on:
       - db
     environment:
