@@ -71,8 +71,33 @@ safe_docker_cleanup
 # SonarQube cleanup
 log_message "Starting SonarQube container cleanup"
 
-run_command "docker exec sonarqube bash -c \"find /opt/sonarqube/data/ce_reports -type f -mtime +30 -delete\"" "Remove old SonarQube analysis reports"
-run_command "docker exec sonarqube bash -c \"find /opt/sonarqube/logs -type f -name '*.log' -mtime +30 -delete\"" "Clear SonarQube logs"
+# Function to safely execute commands in the SonarQube container
+sonarqube_exec() {
+    local cmd="$1"
+    local description="$2"
+    
+    run_command "docker exec sonarqube bash -c \"$cmd\"" "$description"
+}
+
+# Check for ce_reports directory and clean if it exists
+sonarqube_exec "
+if [ -d /opt/sonarqube/data/ce_reports ]; then
+    find /opt/sonarqube/data/ce_reports -type f -mtime +30 -delete
+elif [ -d /opt/sonarqube/extensions/ce_reports ]; then
+    find /opt/sonarqube/extensions/ce_reports -type f -mtime +30 -delete
+else
+    echo 'ce_reports directory not found in expected locations'
+fi
+" "Remove old SonarQube analysis reports"
+
+# Clean SonarQube logs
+sonarqube_exec "
+if [ -d /opt/sonarqube/logs ]; then
+    find /opt/sonarqube/logs -type f -name '*.log' -mtime +30 -delete
+else
+    echo 'Logs directory not found in expected location'
+fi
+" "Clear SonarQube logs"
 
 # Jenkins cleanup
 log_message "Starting Jenkins container cleanup"
